@@ -8,7 +8,7 @@ Allowing to launch several instances ami Free tier eligible.
 To this labs the scripts will finish launching:
    1. - stop.instance-xxxxx.sh
    2. - terminate-instance-xxxxx.sh
-   
+
 Note: Comment these lines to working with the tenant created !
 
 Creates:
@@ -30,7 +30,7 @@ Desc:
 
 
 Note: Filter to 4 lastest Ubuntu in Region Selected.
-      To modify Change amisArray filters```
+      To modify Change amisArray filters
 
 
 Options:
