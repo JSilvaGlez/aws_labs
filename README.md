@@ -8,6 +8,7 @@ Allowing to launch several instances ami Free tier eligible.
 To this labs the scripts will finish launching:
    1. - stop.instance-xxxxx.sh
    2. - terminate-instance-xxxxx.sh
+   
 Note: Comment these lines to working with the tenant created !
 
 Creates:
@@ -20,12 +21,12 @@ Creates:
 ```
 Usage:
        create-aws-ami.sh [options] Wizard show menu to Select Region && Ami
-       create-aws-ami.sh --region <region_id> --ami <image_id> [options]```
+       create-aws-ami.sh --region <region_id> --ami <image_id> [options]
 
 
 Desc:
       Create enviroment aws ec2 cloud in determinate aws Region.
-      Launching several instance Free tier eligible ami.```
+      Launching several instance Free tier eligible ami.
 
 
 Note: Filter to 4 lastest Ubuntu in Region Selected.
