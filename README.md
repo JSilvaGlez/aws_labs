@@ -4,10 +4,16 @@
 Automation tool to create enviroment aws ec2 cloud.                        
 Allowing to launch several instances ami Free tier eligible.
 (Filter 4 lastest Ubuntu linux). Modify to change amiArray
+
+To this labs the scripts will finish launching:
+   1. - stop.instance-xxxxx.sh
+   2. - terminate-instance-xxxxx.sh
+Note: Comment these lines to working with the tenant created !
+
 Creates:
   - VPC, SUBNET, IGWDEFAULT, SECURITY GROUP, RULE SSH_PORT (22)
   - DNS and DNS Hostname Support
-  · In case create 1 instance:
+  - In case create 1 instance:
     - start-instanche-<randomNumber>.sh    # start tenant tool
     - stop-instanche-<randomNumber>.sh     # stop tenant tool
     - terminate-instance-<randomNumber>.sh # terminate/delete tenant tool
