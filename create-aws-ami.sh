@@ -282,63 +282,6 @@ function check_binary() {
 }
 
 
-# DESC: Validate we have superuser access as root (via sudo if requested)
-# ARGS: $1 (optional): Set to any value to not attempt root access via sudo
-# OUTS: None
-function check_superuser() {
-  local superuser test_euid
-  if [[ $EUID -eq 0 ]]; then  # <EUID> equal 0
-    superuser=true
-  elif [[ -z ${1-} ]]; then
-    if check_binary sudo; then
-      pretty_print 'Sudo: Updating cached credentials ...'
-      if ! sudo -v; then
-        verbose_print "Sudo: Couldn't acquire credentials ..." \
-          "${fg_red-}"
-      else
-        test_euid="$(sudo -H -- "$BASH" -c 'printf "%s" "$EUID"')"
-        if [[ $test_euid -eq 0 ]]; then
-          superuser=true
-        fi
-      fi
-    fi
-  fi
-
-  if [[ -z ${superuser-} ]]; then
-    verbose_print 'Unable to acquire superuser credentials.' "${fg_red-}"
-    return 1
-  fi
-
-  verbose_print 'Successfully acquired superuser credentials.'
-  return 0
-}
-
-
-# DESC: Run the requested command as root (via sudo if requested)
-# ARGS: $1 (optional): Set to zero to not attempt execution via sudo
-#       $@ (required): Passed through for execution as root user
-# OUTS: None
-function run_as_root() {
-  if [[ $# -eq 0 ]]; then
-    script_exit 'Missing required argument to run_as_root()!' 2
-  fi
-
-  local try_sudo
-  if [[ ${1-} =~ ^0$ ]]; then
-    try_sudo=true
-    shift
-  fi
-
-  if [[ $EUID -eq 0 ]]; then
-    "$@"
-  elif [[ -z ${try_sudo-} ]]; then
-    sudo -H -- "$@"
-  else
-    script_exit "Unable to run requested command as root: $*" 1
-  fi
-}
-
-
 ###  Scripts functions
 
 # DESC: Setting AWS CLI region default to ~/.aws/config file
