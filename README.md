@@ -19,7 +19,7 @@ Region Selection:
 5) ap-northeast-2   10) ap-southeast-2    15) us-west-2
 
 To this labs the scripts will finish launching:
-   1. - stop.instance-xxxxx.sh
+   1. - stop-instance-xxxxx.sh
    2. - terminate-instance-xxxxx.sh
 
 Note: Comment these lines to working with the tenant created !
