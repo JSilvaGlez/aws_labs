@@ -650,10 +650,9 @@ function main() {
     checkAmi "$image_id"
   fi
 
-  echo "${fg_white-}"
-  echo "Automate tool creating AWS Environment launching Ami:" | report_env
+  echo "${fg_white-}create-aws-ami.sh   Automate tool creating AWS Environment launching Ami ! ! !"
   ## Create the VPC, you will be returned with the vpcid
-  echo "Creating aws Virtual Private Network to allocate instance"
+  echo "${fg_white-}Creating aws Virtual Private Network to allocate instance"
   vpc_id=$(aws ec2 create-vpc --cidr-block $vpc_cidr --query 'Vpc.VpcId' --output text)
   verbose_print  "Created aws Virtual Private Network where allocate the instance: $vpc_id" \
     "${fg_green-}" | report_env
@@ -670,14 +669,14 @@ function main() {
 
 
   ## Create an Internet Gateway
-  echo "Creating an Internet Gateway" "${fg_white-}"
+  echo "${fg_white-}Creating an Internet Gateway"
   igw_id=$(aws ec2 create-internet-gateway --query 'InternetGateway.InternetGatewayId' --output text)
   verbose_print  "Created an Internet Gateway: $igw_id" \
     "${fg_green-}" | report_env
 
 
   ## Associate the Internet Gateway created to our VPC
-  echo "Associating the Internet Gateway created to our VPC"
+  echo "${fg_white-}Associating the Internet Gateway created to our VPC"
   aws ec2 attach-internet-gateway --internet-gateway-id $igw_id \
     --vpc-id $vpc_id | report_env
   verbose_print  "Attached the Internet Gateway created to VPC" \
@@ -689,19 +688,19 @@ function main() {
   # the Routing Table to and then associate the returned routing table id with
   # your returned subnet id. Then create a routing entry to the default gateway
   # which will be the Internet Gateway (IGW)
-  echo "Creating Subnet" "${fg_white-}"
+  echo "${fg_white-}Creating Subnet"
   subnet_id=$(aws ec2 create-subnet --vpc-id $vpc_id --cidr-block $subnet_cidr --query 'Subnet.SubnetId' --output text)
   verbose_print  "Created Subnet: $subnet_id" "${fg_green-}" | report_env
 
 
   # Create Routing Table
-  echo "Creating Routing Table" "${fg_white-}"
+  echo "${fg_white-}Creating Routing Table"
   routetbl_id=$(aws ec2 create-route-table --vpc-id $vpc_id --query 'RouteTable.RouteTableId' --output text)
   verbose_print  "Created Routing Table: $routetbl_id"  \
     "${fg_green-}" | report_env
 
   # Associate Routing Table with Subnet
-  echo "Associating Routing Table with Subnet"
+  echo "${fg_white-}Associating Routing Table with Subnet"
   aws ec2 associate-route-table --route-table-id $routetbl_id \
     --subnet-id $subnet_id | report_env
   verbose_print  "Associating Routing Table:  $routetbl_id, with Subnet: $subnet_id"\
@@ -709,7 +708,7 @@ function main() {
 
 
   # Create a Routing entry to the default Gateway
-  echo "Creating a Routing entry to the default Gateway"
+  echo "${fg_white-}Creating a Routing entry to the default Gateway"
   aws ec2 create-route --route-table-id $routetbl_id \
     --destination-cidr-block $igwdefault_cidr --gateway-id $igw_id | report_env
   verbose_print  "Created a Routing entry to the default Gateway: $igwdefault_cidr" \
@@ -717,13 +716,13 @@ function main() {
 
 
   ## Create a Security Group
-  echo "Creating a Security Group" "${fg_white-}"
+  echo "${fg_white-}Creating a Security Group"
   sg_id=$(aws ec2 create-security-group --group-name my-security-group --description "my-security-group" --vpc-id $vpc_id --query 'GroupId' --output text)
   verbose_print  "Created a Security Group: $sg_id" | report_env
 
 
   ## Add an inbound rule to allow SSH traffic from everywhere
-  echo "Adding an inbound rule to allow SSH traffic from everywhere"
+  echo "${fg_white-}Adding an inbound rule to allow SSH traffic from everywhere"
   aws ec2 authorize-security-group-ingress --group-id $sg_id --protocol tcp \
     --port $ssh_port --cidr $igwdefault_cidr
   verbose_print  "Added an inbound rule to allow SSH traffic from everywhere in port: $ssh_port" \
@@ -731,7 +730,7 @@ function main() {
 
 
   ## Create a KeyPair by connect to instance, output it save to disk:
-  echo "Creating a KeyPair by connect to instance, output it save to disk"
+  echo "${fg_white-}Creating a KeyPair by connect to instance, output it save to disk"
   aws ec2 create-key-pair --key-name $ssh_key_name --query 'KeyMaterial' \
     --output text > ./$ssh_key_name.pem
   verbose_print  "Created a KeyPair by connect to instance, output it save to disk in ./$ssh_key_name.pem" \
@@ -745,26 +744,25 @@ function main() {
 
 
   ## Launch EC2 Instance:
-  echo "Creating instance..." "${fg_white-}"
+  echo "${fg_white-}Creating instance..."
   instance_id=$(aws ec2 run-instances --image-id $image_id --count $count --instance-type $instance_type --key-name $ssh_key_name --security-group-ids $sg_id --subnet-id $subnet_id --associate-public-ip-address --block-device-mapping "[ { \"DeviceName\": \"/dev/sda1\", \"Ebs\": { \"VolumeSize\": $root_vol_size } } ]" --query 'Instances[*].InstanceId' --output text)
   # --region $region
-  verbose_print  "Ceated instance: $instance_id" "${fg_green-}" | report_env
+  verbose_print  "Created instance: $instance_id" "${fg_green-}" | report_env
 
 
   # tag it
-  echo "Tagging $instance_id..." "${fg_white-}"
+  echo "${fg_white-}Tagging $instance_id..."
   aws ec2 create-tags --resources $instance_id --tags Key=Name,Value="$tag_Name" \
     Key=Owner,Value="$tag_Owner"  Key=ApplicationRole,Value="$tag_ApplicationRole" \
     Key=Environment,Value="$tag_Environment" Key=OwnerEmail,Value="$tag_OwnerEmail" \
     Key=Project,Value="$tag_Project" Key=SupportEmail,Value="$tag_SupportEmail"
 
   # Show the instance data created
-  verbose_print  "Showing instance details..." "${fg_white-}"
-  aws ec2 describe-instances --instance-ids $instance_id | report_env
-
+  echo "${fg_white-}Showing instance details..."
+  aws ec2 describe-instances --instance-ids $instance_id
 
   #####  CREATE START INSTANCE SCRIPT #####
-  verbose_print  "Creating stop instance script" "${fg_white-}"
+  echo  "${fg_white-}Creating stop instance script"
   echo -e  "#!/bin/bash" > start-instance-$randomNumber.sh
   echo -e  "aws ec2 start-instances --instance-ids $instance_id --output text | grep -w CURRENTSTATE | awk '{print \$3}'" \
     >> start-instance-$randomNumber.sh
@@ -775,7 +773,7 @@ function main() {
 
 
   #####  CREATE STOP INSTANCE SCRIPT #####
-  verbose_print  "Creating stop instance script" "${fg_white-}"
+  echo  "${fg_white-}Creating stop instance script"
   echo -e  "#!/bin/bash" > stop-instance-$randomNumber.sh
   echo -e  "aws ec2 stop-instances --instance-ids $instance_id --output text | grep -w CURRENTSTATE | awk '{print \$3}'" \
     >> stop-instance-$randomNumber.sh
@@ -786,7 +784,7 @@ function main() {
 
 
   #####  CREATE TERMINATE INSTANCE SCRIPT #####
-  verbose_print  "Creating termination script" "${fg_white-}"
+  echo  "${fg_white-}Creating termination script"
   echo -e  "#!/bin/bash" > terminate-instance-$randomNumber.sh
   echo -e  "aws ec2 terminate-instances --instance-ids $instance_id" \
     >> terminate-instance-$randomNumber.sh
@@ -797,12 +795,12 @@ function main() {
   echo ./terminate-instance-$randomNumber.sh | report_env
 
   ## Get the Public IP by calling the Describe-Instances API call
-  verbose_print  "Describe Instance Created:" "${fg_white-}"
+  echo  "Describe Instance Created:" "${fg_white-}"
   publicDnsName=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[0].Instances[0].PublicDnsName')
 
 
   ## SSH into your EC2 Instance with your KeyPair and Public IP:
-  echo "To Connect to Virtual Machine use:" | report_env
+  echo "${fg_white-}To Connect to Virtual Machine use:" | report_env
   echo ssh -i ./$ssh_key_name.pem ubuntu@${publicDnsName:1:-1} | report_env
 
   ## Aditionally, you can also tag your resource, by doing the following:
@@ -811,7 +809,7 @@ function main() {
 
   # To Finish this lab example will stop instance and terminate.
   # calling to script creates.
-  echo "Waiting to finsh starting current instance created."
+  echo "${fg_white-}Waiting to finish starting current instance created."
   echo "Next steps: Stop and Terminate Instance"
   sleep 30
   bash ./stop-instance-$randomNumber.sh
